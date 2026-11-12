@@ -1,6 +1,6 @@
 // Offline cache. Serves the cached copy straight away so the app opens instantly with no
 // signal, and refreshes the cache in the background so the next launch gets any update.
-const CACHE = 'duocalc-v1';
+const CACHE = 'duocalc-v2';
 const FILES = ['./', './index.html', './style.css', './engine.js', './app.js', './manifest.webmanifest', './icon.png'];
 
 self.addEventListener('install', (e) => {

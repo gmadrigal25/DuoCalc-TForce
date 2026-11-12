@@ -81,7 +81,7 @@ Static files with no build step. Open `index.html`, or run `npm run serve`.
   hooks.
 - `style.css` contains the look. All the geometry comes from CSS variables set by `layout()`.
 - `sw.js` and `manifest.webmanifest` handle offline use and Home Screen install.
-- `icon.png` is a plain calculator icon, which `tools/make_icon.py` regenerates. You can replace
+- `icon.png` is drawn from scratch by `tools/make_icon.py` in the style of the iOS system icon. You can replace
   it with any 512×512 PNG.
 - `npm test` runs the unit tests and a Chromium run-through of a full performance at Duo-like
   sizes, including unfolding mid-force. Screenshots go to `tests/shots/`.
