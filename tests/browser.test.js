@@ -10,18 +10,19 @@ const url = 'file://' + path.resolve(__dirname, '..', 'index.html');
 const shots = path.join(__dirname, 'shots');
 fs.mkdirSync(shots, { recursive: true });
 
-// Approximate sizes in points. Apple hasn't published the Duo's point sizes here, so these
-// bracket the reported shapes: a squat ~1.47:1 cover screen and a ~1.41:1 inner screen.
+// Screen sizes in points, from screenshots of the real Calculator on the iPhone Duo (3x).
 const SCREENS = {
-  'iphone-393x852': { width: 393, height: 852 },
-  'duo-cover-474x696': { width: 474, height: 696 },
-  'duo-inner-landscape-904x640': { width: 904, height: 640 },
-  'duo-inner-portrait-640x904': { width: 640, height: 904 },
+  'iphone-393x852': { width: 393, height: 852, mode: 'iphone' },
+  'duo-cover-466x678': { width: 466, height: 678, mode: 'coverPortrait' },
+  'duo-cover-landscape-678x466': { width: 678, height: 466, mode: 'coverLandscape' },
+  'duo-inner-portrait-669x951': { width: 669, height: 951, mode: 'innerPortrait' },
+  'duo-inner-landscape-951x669': { width: 951, height: 669, mode: 'innerLandscape' },
 };
+const size = ({ width, height }) => ({ width, height });
 
 (async () => {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: SCREENS['duo-cover-474x696'], hasTouch: true });
+  const page = await browser.newPage({ viewport: size(SCREENS['duo-cover-466x678']), hasTouch: true });
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto(url);
@@ -39,8 +40,9 @@ const SCREENS = {
 
   // Layout checks at each size: everything on screen, nothing overlapping.
   for (const [name, vp] of Object.entries(SCREENS)) {
-    await page.setViewportSize(vp);
+    await page.setViewportSize(size(vp));
     await page.waitForTimeout(100);
+    assert.strictEqual(await page.evaluate(() => window.__calc.mode()), vp.mode, name + ' layout chosen');
     const boxes = await page.evaluate(() => {
       const r = (s) => document.querySelector(s).getBoundingClientRect().toJSON();
       return { kp: r('#keypad'), disp: r('#display'), expr: r('#expr'), clock: r('#clockBtn'), key: r('[data-key="7"]') };
@@ -52,7 +54,7 @@ const SCREENS = {
   }
 
   // --- A full performance, starting folded ---
-  await page.setViewportSize(SCREENS['duo-cover-474x696']);
+  await page.setViewportSize(size(SCREENS['duo-cover-466x678']));
   await type('2026');
   await hold('#clockBtn'); await page.mouse.up();
   let s = await state();
@@ -79,7 +81,7 @@ const SCREENS = {
   // Spectator taps randomly; unfold halfway through
   await tapAt(30, 400);
   await tapAt(400, 650);
-  await page.setViewportSize(SCREENS['duo-inner-landscape-904x640']);
+  await page.setViewportSize(size(SCREENS['duo-inner-landscape-951x669']));
   await page.waitForTimeout(100);
   await tapAt(450, 100);
   await tapAt(800, 600);
@@ -87,6 +89,9 @@ const SCREENS = {
   s = await state();
   assert.strictEqual(s.text, '936+1,090', 'random taps typed 1090');
   assert.strictEqual(s.force.fed, 4);
+  const visibleLines = await page.evaluate(() =>
+    ['side1', 'side2', 'side3'].filter((id) => document.getElementById(id).style.visibility !== 'hidden').length);
+  assert.strictEqual(visibleLines, 0, 'sidebar tell: no lines once all digits are in');
   await page.screenshot({ path: path.join(shots, 'digits-in-unfolded.png') });
 
   await key('=');
@@ -117,7 +122,7 @@ const SCREENS = {
   assert.strictEqual((await state()).text, '56', 'repeat =');
 
   for (const [name, vp] of Object.entries(SCREENS)) {
-    await page.setViewportSize(vp);
+    await page.setViewportSize(size(vp));
     await page.waitForTimeout(80);
     await page.screenshot({ path: path.join(shots, name + '.png') });
   }

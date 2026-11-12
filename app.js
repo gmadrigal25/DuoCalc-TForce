@@ -16,6 +16,7 @@
   const clockBtn = $('clockBtn');
   const modeBtn = $('modeBtn');
   const minuteHand = $('minuteHand');
+  const sideLines = [$('side1'), $('side2'), $('side3')];
   const toastEl = $('toast');
 
   const HOLD_MS = 700;
@@ -27,6 +28,7 @@
     format: 'duocalc.format',
     lift: 'duocalc.lift',
     blackout: 'duocalc.blackout',
+    screen: 'duocalc.screen',
   };
 
   const store = {
@@ -44,13 +46,27 @@
   // ======================================================================
   // Layout. Recomputed on every resize, so folding / unfolding the Duo (or
   // rotating) re-fits the calculator without losing anything that's typed.
+  //
+  // The four Duo layouts are measured from screenshots of the real Calculator
+  // on the iPhone Duo (points, at 3x). They're 5 columns x 4 rows. Ordinary
+  // tall iPhones get the iPhone's own 4 x 5 layout.
   // ======================================================================
-  const REF_KEY = 84.25; // key diameter on a 393pt-wide iPhone; all other sizes are relative to it
-  const GAP_RATIO = 8 / REF_KEY;
-  const MAX_KEY_ASPECT = 1.8; // widest a capsule key gets before the keypad centres instead
+  const DUO = {
+    // ref: screen size the numbers were measured at. side: left/right keypad margin.
+    // keyH: key height ('circle' = as tall as wide). font: big number size.
+    // textGap: big number baseline to keypad. rightBtn: right edge to calculator button.
+    coverPortrait: { ref: [466, 678], side: [16, 16], gap: [10, 10], keyH: 'circle', font: 72, textGap: 24, rightBtn: 104 },
+    coverLandscape: { ref: [678, 466], side: [13.7, 97.3], gap: [10, 10], keyH: 46, font: 47.7, textGap: 16.3, rightBtn: 104 },
+    innerPortrait: { ref: [669, 951], side: [24, 24], gap: [10, 10], keyH: 92.7, font: 111.6, textGap: 36, rightBtn: 20 },
+    innerLandscape: { ref: [951, 669], side: [24, 24], gap: [12, 12], keyH: 61.3, font: 75, textGap: 24.7, rightBtn: 20 },
+  };
+  const COVER_MAX_SHORT_SIDE = 560; // cover screen ~466pt across, inner ~669pt
+  const BASELINE = 0.86; // baseline position within a line-height:1 box, in em (SF Pro)
 
   let lift = parseFloat(store.get(KEYS.lift)) || 0; // manual vertical nudge in pt (+ moves down)
   let blackoutSideways = store.get(KEYS.blackout) === '1';
+  let forcedScreen = store.get(KEYS.screen) || ''; // '', 'cover', 'inner' or 'iphone'
+  let screenKind = 'cover'; // which screen we decided we're on; the tell icon depends on it
 
   function insets() {
     const cs = getComputedStyle(probe);
@@ -62,63 +78,111 @@
     };
   }
 
+  function pickMode(W, H) {
+    const portrait = H >= W;
+    const long = Math.max(W, H);
+    const short = Math.min(W, H);
+    let kind = forcedScreen;
+    if (!kind) {
+      if (portrait && long / short > 1.7) kind = 'iphone';
+      else kind = short < COVER_MAX_SHORT_SIDE ? 'cover' : 'inner';
+    }
+    if (kind === 'iphone' && portrait) return { kind, mode: 'iphone' };
+    if (kind === 'iphone') kind = 'inner'; // a tall iPhone held sideways: use the wide layout
+    return { kind, mode: kind + (portrait ? 'Portrait' : 'Landscape') };
+  }
+
+  // The iPhone layout: 4 x 5 round keys filling the width.
+  function iphoneGeometry(W, H, safe) {
+    const top = Math.max(safe.top, 10);
+    const usableW = W - safe.left - safe.right;
+    const pad = Math.min(28, Math.max(12, (usableW * 16) / 393));
+    const gapRatio = 8 / 84.25;
+    const keyFromW = (usableW - 2 * pad) / (4 + 3 * gapRatio);
+    const keyFromH = (H - top - safe.bottom) / (0.52 + 1.45 + 5 + 4 * gapRatio + 0.33);
+    const keyH = Math.min(keyFromW, keyFromH);
+    const s = keyH / 84.25;
+    const gap = 8 * s;
+    const kpWidth = 4 * keyH + 3 * gap;
+    const kpLeft = safe.left + (usableW - kpWidth) / 2;
+    const kpTop = H - safe.bottom - 28 * s - (5 * keyH + 4 * gap) + lift;
+    const font = 64 * s;
+    return {
+      cols: 4, keyW: keyH, keyH, gapX: gap, gapY: gap, kpLeft, kpTop, kpWidth,
+      font, dispTop: kpTop - 13 * s - font, glyph: s, label: 35 * s,
+      round: Math.min(56, Math.max(34, 44 * s)), roundTop: top,
+      roundLeft: safe.left + pad, roundRight: safe.right + pad,
+    };
+  }
+
+  function duoGeometry(W, H, safe, m, landscape) {
+    const sy = H / m.ref[1];
+    let [left, right] = m.side;
+    // A reserved band on one side (cover screen, landscape). If iOS reports it as a safe
+    // area, don't count it twice; if it's reported on the left, put the gap there instead.
+    if (safe.left > safe.right && landscape) [left, right] = [right, left];
+    left = Math.max(left, safe.left + Math.min(...m.side));
+    right = Math.max(right, safe.right + Math.min(...m.side));
+    const [gapX, gapY] = m.gap;
+    const keyW = (W - left - right - 4 * gapX) / 5;
+    const keyH =
+      m.keyH === 'circle'
+        ? Math.min(keyW, (0.56 * H - 3 * gapY) / 4)
+        : Math.min(keyW, m.keyH * sy);
+    const bottom = Math.max(34, safe.bottom);
+    const kpTop = H - bottom - (4 * keyH + 3 * gapY) + lift;
+    const font = m.font * sy;
+    return {
+      cols: 5, keyW, keyH, gapX, gapY, kpLeft: left, kpTop, kpWidth: W - left - right,
+      font, dispTop: kpTop - m.textGap * sy - BASELINE * font,
+      glyph: keyH * 0.0124, label: keyH * 0.43,
+      round: 48, roundTop: Math.max(24, safe.top),
+      roundLeft: safe.left + 20, roundRight: Math.max(m.rightBtn, safe.right + 20),
+    };
+  }
+
   function layout() {
     const W = calcEl.clientWidth;
     const H = calcEl.clientHeight;
     if (!W || !H) return;
     const safe = insets();
-    const standalone =
-      navigator.standalone === true ||
-      (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
-    const top = safe.top + (standalone ? 0 : 10);
-    const usableW = W - safe.left - safe.right;
-    const pad = Math.min(28, Math.max(12, (usableW * 16) / 393));
+    const { kind, mode } = pickMode(W, H);
+    const g = mode === 'iphone' ? iphoneGeometry(W, H, safe) : duoGeometry(W, H, safe, DUO[mode], W > H);
 
-    // Biggest key the width allows, and the biggest the height allows once room is left for
-    // the top buttons (~0.52 key), the two text lines (~1.45 keys) and the bottom margin.
-    const keyFromW = (usableW - 2 * pad) / (4 + 3 * GAP_RATIO);
-    const keyFromH = (H - top - safe.bottom) / (0.52 + 1.45 + 5 + 4 * GAP_RATIO + 0.33);
-    const keyH = Math.min(keyFromW, keyFromH);
-    const s = keyH / REF_KEY;
-    const keyW = Math.min(keyFromW, keyH * MAX_KEY_ASPECT);
-    const gapY = 8 * s;
-    const gapX = keyW >= keyFromW - 0.01 ? (usableW - 2 * pad - 4 * keyW) / 3 : gapY;
-
-    const kpWidth = 4 * keyW + 3 * gapX;
-    const kpHeight = 5 * keyH + 4 * gapY;
-    const kpLeft = safe.left + (usableW - kpWidth) / 2;
-    const kpTop = H - safe.bottom - 28 * s - kpHeight + lift;
-
-    const dispFont = 64 * s;
-    const dispTop = kpTop - 13 * s - dispFont;
-    const exprFont = 27 * s;
-    const exprTop = dispTop - 13 * s - exprFont;
-    const round = Math.min(56, Math.max(34, 44 * s));
-
+    const exprFont = 0.42 * g.font;
     const vars = {
-      '--s': s.toFixed(4),
-      '--key-w': keyW + 'px',
-      '--key-h': keyH + 'px',
-      '--gap-x': gapX + 'px',
-      '--gap-y': gapY + 'px',
-      '--kp-left': kpLeft + 'px',
-      '--kp-top': kpTop + 'px',
-      '--kp-width': kpWidth + 'px',
-      '--label': 35 * s + 'px',
-      '--disp-font': dispFont + 'px',
-      '--disp-top': dispTop + 'px',
+      '--s': g.glyph.toFixed(4),
+      '--rs': (g.round / 44).toFixed(4),
+      '--cols': g.cols,
+      '--key-w': g.keyW + 'px',
+      '--key-h': g.keyH + 'px',
+      '--gap-x': g.gapX + 'px',
+      '--gap-y': g.gapY + 'px',
+      '--kp-left': g.kpLeft + 'px',
+      '--kp-top': g.kpTop + 'px',
+      '--kp-width': g.kpWidth + 'px',
+      '--label': g.label + 'px',
+      '--disp-font': g.font + 'px',
+      '--disp-top': g.dispTop + 'px',
       '--expr-font': exprFont + 'px',
-      '--expr-top': exprTop + 'px',
-      '--text-left': kpLeft + 'px',
-      '--text-right': W - kpLeft - kpWidth + 'px',
-      '--round': round + 'px',
-      '--round-top': top + 'px',
-      '--round-left': safe.left + pad + 'px',
-      '--round-right': safe.right + pad + 'px',
+      '--expr-top': g.dispTop - 0.2 * g.font - exprFont + 'px',
+      '--text-left': g.kpLeft + 'px',
+      '--text-right': W - g.kpLeft - g.kpWidth + 'px',
+      '--round': g.round + 'px',
+      '--round-top': g.roundTop + 'px',
+      '--round-left': g.roundLeft + 'px',
+      '--round-right': g.roundRight + 'px',
     };
     const root = document.documentElement.style;
     for (const k in vars) root.setProperty(k, vars[k]);
 
+    calcEl.classList.toggle('duo', mode !== 'iphone');
+    calcEl.classList.toggle('inner', kind === 'inner');
+    calcEl.dataset.mode = mode;
+    if (kind !== screenKind) {
+      screenKind = kind;
+      tell();
+    }
     calcEl.classList.toggle('blackout', blackoutSideways && W > H);
     window.scrollTo(0, 0);
     fitDisplay();
@@ -323,22 +387,27 @@
   // The force
   // ======================================================================
 
-  // The tell, on the clock's minute hand:
-  //   3 o'clock  nothing set
-  //   9 o'clock  force number set (and while the spectator's digits are still owed)
-  //   6 o'clock  every digit is in; = will show the force number
+  // The tell, on the top-left button.
+  //   Clock (cover screen / iPhone)       Sidebar icon (Duo unfolded)
+  //   3 o'clock  nothing set              3 lines
+  //   9 o'clock  force number set         2 lines   (also while digits are still owed)
+  //   6 o'clock  every digit is in        no lines  (= will show the force number)
   function tell() {
+    const done = force.armed && force.fed >= force.digits.length;
+    const set = force.target !== null;
     let x = 17;
     let y = 12;
-    if (force.armed && force.fed >= force.digits.length) {
+    if (done) {
       x = 12;
       y = 17;
-    } else if (force.target !== null) {
+    } else if (set) {
       x = 7;
       y = 12;
     }
     minuteHand.setAttribute('x2', String(x));
     minuteHand.setAttribute('y2', String(y));
+    const lines = done ? 0 : set ? 2 : 3;
+    sideLines.forEach((el, i) => { el.style.visibility = i < lines ? 'visible' : 'hidden'; });
   }
 
   function setTarget(n) {
@@ -623,6 +692,7 @@
   //   ?t=1234       preset the force number
   //   ?lift=-6      nudge the layout up/down in points if it sits wrong on your phone (0 resets)
   //   ?blackout=1   go black when the screen is wider than tall (0 turns it off)
+  //   ?screen=cover|inner|iphone   force a layout if the automatic choice is wrong (auto resets)
   function readOptions() {
     const p = new URLSearchParams(location.search);
     const hash = (location.hash.match(/^#t=(.+)$/) || [])[1];
@@ -638,6 +708,12 @@
     if (p.has('lift')) {
       lift = parseFloat(p.get('lift')) || 0;
       store.set(KEYS.lift, String(lift));
+      used = true;
+    }
+    if (p.has('screen')) {
+      forcedScreen = ['cover', 'inner', 'iphone'].includes(p.get('screen')) ? p.get('screen') : '';
+      if (forcedScreen) store.set(KEYS.screen, forcedScreen);
+      else store.remove(KEYS.screen);
       used = true;
     }
     if (p.has('blackout')) {
@@ -666,6 +742,7 @@
     clearTarget,
     neededFor,
     layout,
+    mode: () => calcEl.dataset.mode,
     state: () => ({ seq: seq.slice(), entry, result, grey: grey.slice(), force: { ...force }, text: textEl.textContent, greyText: exprTextEl.textContent }),
   };
 })();

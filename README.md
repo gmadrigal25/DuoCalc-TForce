@@ -21,8 +21,9 @@ Force uses. It's a fresh implementation, not a copy of that code.
 
 ## Performing
 
-1. **Set the force number.** Type it, then **hold the clock** (top left) for about a second. The
-   display clears and the clock's minute hand moves to **9 o'clock**. Hold the **calculator icon**
+1. **Set the force number.** Type it, then **hold the top-left button** (the clock, or the
+   sidebar icon when the Duo is unfolded) for about a second. The display clears and the tell
+   changes (see below). Hold the **calculator icon**
    (top right) at any time to peek at the number.
 2. **The spectator does real maths.** Every step is genuine and can be checked on another
    calculator.
@@ -34,11 +35,19 @@ Force uses. It's a fresh implementation, not a copy of that code.
    pressed.
 4. **Every tap anywhere types the next digit** of the number that's needed. The spectator can
    drum their fingers anywhere, or tap with the phone face down. Two or three fingers landing
-   together count as one tap. When every digit is in, the minute hand moves to **6 o'clock**, and
-   further taps do nothing. **Backspace** still deletes a digit, and the next tap re-types it.
+   together count as one tap. When every digit is in, the tell changes again (below), and further
+   taps do nothing. **Backspace** still deletes a digit, and the next tap re-types it.
    You can fold or unfold the phone in the middle of this.
 5. **Press =**. The force number appears, with a believable sum in grey above it. The force
    number then clears itself, and the hand returns to 3 o'clock.
+
+**The tell** is on the top-left button:
+
+| | Clock (Duo folded, or iPhone) | Sidebar icon (Duo unfolded) |
+| --- | --- | --- |
+| Nothing set | hand at 3 o'clock | 3 little lines |
+| Force number set, or digits still owed | hand at 9 o'clock | 2 lines |
+| Every digit is in, ready for = | hand at 6 o'clock | no lines |
 
 Other details:
 
@@ -55,21 +64,24 @@ Other details:
 | --- | --- |
 | `…/?t=1234` | Preset the force number. It's kept until it's used or cleared. |
 | `…/?lift=-6` | Nudge the whole layout up (negative) or down in points if it sits wrong on your phone. `?lift=0` resets it. |
+| `…/?screen=cover` | Force the cover / `inner` / `iphone` layout if the automatic choice is wrong. `?screen=auto` resets it. |
 | `…/?blackout=1` | Go black whenever the screen is wider than tall (`0` turns this off). It's off by default because the unfolded Duo is landscape. |
 
 ## How it fits the Duo
 
-No screen size is hard-coded. On every resize, `layout()` in `app.js` reads the safe areas and
-works out the biggest key that fits both the width and the height:
+The layouts are measured from screenshots of the real Calculator on the iPhone Duo. To within
+a pixel, they match the key sizes, gaps, margins, number size and button positions in all four
+cases:
 
-- **Ordinary iPhone:** round keys, matching the stock layout.
-- **Duo cover screen** (short and wide): the keys stretch into capsules so the keypad still
-  fills the width, with room left for the display.
-- **Duo inner screen** (unfolded, landscape): the capsules stop widening at a set limit, and the
-  keypad sits in the centre.
+- **Folded, upright:** 5 × 4 round keys.
+- **Folded, sideways:** 5 × 4 capsule keys, with the keypad stopping short of the right edge.
+- **Unfolded, upright:** 5 × 4 tall capsules, with a sidebar icon top left.
+- **Unfolded, sideways:** 5 × 4 wide capsules, with a sidebar icon top left.
 
-Apple hasn't documented the Duo's exact point sizes, so the tests use approximate shapes. If the
-keypad sits a little high or low on the real phone, use `?lift=`.
+The app picks the layout from the screen size every time it changes, so folding, unfolding and
+rotating re-fit it immediately without losing anything that's typed. Ordinary tall iPhones get
+the iPhone's 4 × 5 layout. If the keypad sits a little high or low on the real phone, use
+`?lift=`. If the wrong layout is chosen, use `?screen=`.
 
 ## Development
 

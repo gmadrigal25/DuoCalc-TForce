@@ -23,18 +23,20 @@
   --round-left: 16px;
   --round-right: 16px;
 
-  --orange: #ff9500;
-  --orange-low: #f98b00;
-  --orange-press: #fcc78d;
-  --fn: #5c5c5e;
-  --fn-low: #505052;
+  --rs: 1;                /* scale for the top round buttons' icons */
+  --cols: 4;
+
+  /* Colours sampled from the iPhone Duo Calculator */
+  --orange: #f19837;
+  --orange-press: #f9c995;
+  --fn: #616161;
   --fn-press: #a5a5a8;
-  --num: #333335;
-  --num-low: #2c2c2e;
+  --num: #353535;
   --num-press: #737373;
-  --round-bg: #1f1f21;
+  --round-bg: #1f1f1f;
   --grey-text: #8e8e93;
-  --rim: rgba(255, 255, 255, 0.14);
+  --rim: rgba(255, 255, 255, 0.07);
+  --rim-top: rgba(255, 255, 255, 0.13);
 }
 
 * { box-sizing: border-box; }
@@ -102,7 +104,7 @@ button svg {
   height: var(--round);
   border-radius: 50%;
   background: var(--round-bg);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 var(--rim-top), inset 0 0 0 1px var(--rim);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -111,6 +113,14 @@ button svg {
 .round.left { left: var(--round-left); }
 .round.right { right: var(--round-right); }
 .round.pressed { transition: none; background: #3a3a3c; }
+.round svg {
+  width: calc(var(--w) * var(--rs) * 1px);
+  height: calc(var(--h) * var(--rs) * 1px);
+}
+/* Unfolded Duo shows a sidebar icon top left; everywhere else it's the clock */
+.icon-sidebar { display: none; }
+.calc.inner .icon-sidebar { display: block; }
+.calc.inner .icon-clock { display: none; }
 
 .toast {
   position: absolute;
@@ -138,11 +148,46 @@ button svg {
   top: var(--kp-top);
   width: var(--kp-width);
   display: grid;
-  grid-template-columns: repeat(4, var(--key-w));
+  grid-template-columns: repeat(var(--cols), var(--key-w));
+  /* iPhone: 4 x 5 */
+  grid-template-areas:
+    "bs ac pct div"
+    "k7 k8 k9 mul"
+    "k4 k5 k6 sub"
+    "k1 k2 k3 add"
+    "neg k0 dot eq";
   grid-auto-rows: var(--key-h);
   column-gap: var(--gap-x);
   row-gap: var(--gap-y);
 }
+/* iPhone Duo: 5 x 4 */
+.calc.duo .keypad {
+  grid-template-areas:
+    "k7 k8 k9 bs div"
+    "k4 k5 k6 ac mul"
+    "k1 k2 k3 pct sub"
+    "neg k0 dot eq add";
+}
+.key[data-key="0"] { grid-area: k0; }
+.key[data-key="1"] { grid-area: k1; }
+.key[data-key="2"] { grid-area: k2; }
+.key[data-key="3"] { grid-area: k3; }
+.key[data-key="4"] { grid-area: k4; }
+.key[data-key="5"] { grid-area: k5; }
+.key[data-key="6"] { grid-area: k6; }
+.key[data-key="7"] { grid-area: k7; }
+.key[data-key="8"] { grid-area: k8; }
+.key[data-key="9"] { grid-area: k9; }
+.key[data-key="bs"] { grid-area: bs; }
+.key[data-key="clear"] { grid-area: ac; }
+.key[data-key="percent"] { grid-area: pct; }
+.key[data-key="/"] { grid-area: div; }
+.key[data-key="*"] { grid-area: mul; }
+.key[data-key="-"] { grid-area: sub; }
+.key[data-key="+"] { grid-area: add; }
+.key[data-key="="] { grid-area: eq; }
+.key[data-key="negate"] { grid-area: neg; }
+.key[data-key="."] { grid-area: dot; }
 
 .key {
   width: var(--key-w);
@@ -155,12 +200,12 @@ button svg {
   font-weight: 400;
   line-height: 1;
   color: #fff;
-  box-shadow: inset 0 0 0 1px var(--rim);
+  box-shadow: inset 0 1px 0 var(--rim-top), inset 0 0 0 1px var(--rim);
   transition: background-color 0.28s ease-out;
 }
-.key.num { background: linear-gradient(160deg, var(--num) 55%, var(--num-low)); }
-.key.fn  { background: linear-gradient(160deg, var(--fn) 45%, var(--fn-low)); }
-.key.op  { background: linear-gradient(180deg, var(--orange) 60%, var(--orange-low)); }
+.key.num { background: var(--num); }
+.key.fn  { background: var(--fn); }
+.key.op  { background: var(--orange); }
 .key.pressed { transition: none; }
 .key.num.pressed { background: var(--num-press); }
 .key.fn.pressed  { background: var(--fn-press); }

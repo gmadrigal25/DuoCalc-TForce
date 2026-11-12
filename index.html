@@ -23,19 +23,30 @@
       <!-- Reads the safe-area insets so the layout code can use them. -->
       <div class="safe-probe" id="safeProbe" aria-hidden="true"></div>
 
-      <!-- Top left: history clock. Hold to set / clear the force number. The minute hand is the tell. -->
+      <!-- Top left: history. A clock on the cover screen / iPhone, a sidebar icon when the Duo is
+           unfolded (as in the real app). Hold to set / clear the force number. The icon is the tell. -->
       <button class="round left" id="clockBtn" type="button" aria-label="History">
-        <svg viewBox="0 0 24 24" style="--w: 22; --h: 22" fill="none" stroke="currentColor"
-             stroke-width="2.1" stroke-linecap="round">
+        <svg class="icon-clock" viewBox="0 0 24 24" style="--w: 20.5; --h: 20.5" fill="none"
+             stroke="currentColor" stroke-width="2.1" stroke-linecap="round">
           <circle cx="12" cy="12" r="10.8" />
           <line x1="12" y1="12" x2="12" y2="6" />
           <line id="minuteHand" x1="12" y1="12" x2="17" y2="12" />
+        </svg>
+        <svg class="icon-sidebar" viewBox="0 0 26 20" style="--w: 23; --h: 17.7" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <rect x="1" y="1" width="24" height="18" rx="4" />
+          <line x1="10.2" y1="1" x2="10.2" y2="19" />
+          <g stroke-width="1.6">
+            <line id="side1" x1="4" y1="5.3" x2="6.8" y2="5.3" />
+            <line id="side2" x1="4" y1="8.3" x2="6.8" y2="8.3" />
+            <line id="side3" x1="4" y1="11.3" x2="6.8" y2="11.3" />
+          </g>
         </svg>
       </button>
 
       <!-- Top right: calculator mode. Hold to peek at the force number, double-tap for number format. -->
       <button class="round right" id="modeBtn" type="button" aria-label="Calculator mode">
-        <svg viewBox="0 0 16 22" style="--w: 16; --h: 22">
+        <svg viewBox="0 0 16 22" style="--w: 14.7; --h: 20.2">
           <path fill="currentColor" fill-rule="evenodd"
                 d="M3.3 0h9.4A3.3 3.3 0 0 1 16 3.3v15.4a3.3 3.3 0 0 1-3.3 3.3H3.3A3.3 3.3 0 0 1 0 18.7V3.3A3.3 3.3 0 0 1 3.3 0Z
                    M3.6 2.6a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h8.8a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1Z
@@ -52,7 +63,7 @@
 
       <div class="keypad" id="keypad">
         <button class="key fn" data-key="bs" type="button" aria-label="Delete">
-          <svg viewBox="0 0 40 32" style="--w: 36; --h: 29" fill="none" stroke="currentColor"
+          <svg viewBox="0 0 40 32" style="--w: 40; --h: 32" fill="none" stroke="currentColor"
                stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
             <path d="M2 16 L12.5 3.2 Q13.6 2 15.2 2 H34 Q38 2 38 6 V26 Q38 30 34 30 H15.2 Q13.6 30 12.5 28.8 Z" />
             <path d="M20 11 L29 21 M29 11 L20 21" />
