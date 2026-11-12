@@ -1,4 +1,4 @@
-# DuoCalc T-Force
+# DuoCalcDM
 
 A working replica of the iPhone Calculator, built as a web app you add to your Home Screen,
 with a forcing mechanism built in. It's [CalcDM](https://github.com/dmaso/calcdm) by Dave Mason,
@@ -25,7 +25,7 @@ middle of the routine. It also works on ordinary iPhones.
 - [andyjermann/fakecalc](https://github.com/andyjermann/fakecalc) is the static-screenshot
   version CalcDM started from.
 
-This version was adapted by gmadrigal25, who changed only what the iPhone Duo needed. The
+The name DuoCalcDM is in honour of Dave Mason's CalcDM. This version was adapted by gmadrigal25, who changed only what the iPhone Duo needed. The
 code was rewritten from scratch for the Duo's two screens, while keeping CalcDM's behaviour and
 controls exactly as Dave Mason designed them.
 
@@ -44,8 +44,9 @@ controls exactly as Dave Mason designed them.
 
 1. Host the folder over **HTTPS**. The easiest option is GitHub Pages: repo **Settings → Pages →
    Deploy from a branch**, pick the branch and `/ (root)`. Any static host works too.
-2. Open the URL in **Safari** on the Duo, then **Share → Add to Home Screen**, and name it
-   **Calculator**.
+2. Open the URL (for GitHub Pages, `https://gmadrigal25.github.io/DuoCalcDM/`) in **Safari** on
+   the Duo, then **Share → Add to Home Screen**, and name it **Calculator**. The Home Screen
+   name stays "Calculator" so it passes as the real app.
 3. Launch it once from the Home Screen while online so it caches. After that it works offline.
 4. Turn **Rotation Lock** on. The real Calculator switches to scientific mode when it's turned
    sideways, but this one doesn't.
