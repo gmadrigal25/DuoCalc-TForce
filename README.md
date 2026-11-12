@@ -1,13 +1,44 @@
 # DuoCalc T-Force
 
-A working calculator web app with a hidden forcing mechanism, made to perform
-[The Alright Force](https://www.thejerx.com/blog/2026/9/15/the-alright-force) (The Jerx) on the
-**iPhone Duo**. It re-fits itself instantly to the folded cover screen and the unfolded inner
-screen, and it keeps everything that's typed (including a force in progress) when you fold or
-unfold mid-routine. It also works on any ordinary iPhone.
+A working replica of the iPhone Calculator, built as a web app you add to your Home Screen,
+with a forcing mechanism built in. It's [CalcDM](https://github.com/dmaso/calcdm) by Dave Mason,
+adapted for the **iPhone Duo**. It's made for
+[The Alright Force](https://www.thejerx.com/blog/2026/9/15/the-alright-force) from The Jerx, and
+lets you do the whole routine face up while the spectator drums their fingers on the screen.
 
-It recreates the behaviour of [dmaso/calcdm](https://github.com/dmaso/calcdm), the app the Alright
-Force uses. It's a fresh implementation, not a copy of that code.
+Folded or unfolded, it matches the Duo's own Calculator. It re-fits instantly when you fold,
+unfold or rotate the phone, and keeps a force in progress, so you can open the phone in the
+middle of the routine. It also works on ordinary iPhones.
+
+## Credits
+
+- **[Dave Mason](https://github.com/dmaso)** created [CalcDM](https://github.com/dmaso/calcdm)
+  ([calcdm.com](https://calcdm.com)), the app and forcing method this is based on. All credit
+  for the idea and how it works goes to him.
+- **[The Jerx](https://www.thejerx.com)** published
+  [The Alright Force](https://www.thejerx.com/blog/2026/9/15/the-alright-force), the routine this
+  is built for. Earlier background:
+  [the calculator force, face up](https://www.thejerx.com/blog/2025/5/6/t12u882u8mz4kzsjc0hfh1efgbqdpx)
+  and [Carefree Toxic](https://www.thejerx.com/blog/2025/5/13/carefree-toxic).
+- [The Daily Magician: the I.C.F. force](https://thedailymagician.com/icf-force) is the force
+  CalcDM was originally made for.
+- [andyjermann/fakecalc](https://github.com/andyjermann/fakecalc) is the static-screenshot
+  version CalcDM started from.
+
+This version was adapted by gmadrigal25, who changed only what the iPhone Duo needed. The
+code was rewritten from scratch for the Duo's two screens, while keeping CalcDM's behaviour and
+controls exactly as Dave Mason designed them.
+
+### What's different from CalcDM
+
+- Layouts for the Duo's cover screen and inner screen, upright and sideways, using the Duo
+  Calculator's 5 × 4 keypad, measured from screenshots of the real app.
+- It re-fits when you fold or unfold, without losing the number, the sum or a force in
+  progress.
+- It doesn't black out when held sideways, because the unfolded Duo is used in landscape.
+- The clock hand swings between positions rather than jumping, and holding the clock and
+  calculator buttons is protected against iOS long-press gestures.
+- `?screen=` and `?lift=` URL options, for adjusting the layout on the phone.
 
 ## Install on the phone
 
