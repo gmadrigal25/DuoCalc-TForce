@@ -1,0 +1,213 @@
+/* Geometry comes from app.js (layout()), which sets the custom properties below from the
+   live screen size. That's what lets one page fit the iPhone Duo's narrow cover screen, its
+   wide unfolded screen and an ordinary iPhone, and re-fit instantly when it folds or unfolds.
+   The defaults here only matter for the first frame. */
+:root {
+  --s: 1;                 /* scale: 1 = an 86pt key on a 393pt-wide iPhone */
+  --key-w: 84px;
+  --key-h: 84px;
+  --gap-x: 8px;
+  --gap-y: 8px;
+  --kp-left: 16px;
+  --kp-top: 340px;
+  --kp-width: 361px;
+  --label: 34px;
+  --disp-font: 62px;
+  --disp-top: 260px;
+  --expr-font: 26px;
+  --expr-top: 220px;
+  --text-left: 16px;
+  --text-right: 16px;
+  --round: 44px;
+  --round-top: 12px;
+  --round-left: 16px;
+  --round-right: 16px;
+
+  --orange: #ff9500;
+  --orange-low: #f98b00;
+  --orange-press: #fcc78d;
+  --fn: #5c5c5e;
+  --fn-low: #505052;
+  --fn-press: #a5a5a8;
+  --num: #333335;
+  --num-low: #2c2c2e;
+  --num-press: #737373;
+  --round-bg: #1f1f21;
+  --grey-text: #8e8e93;
+  --rim: rgba(255, 255, 255, 0.14);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #000;
+  color: #fff;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.calc {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  touch-action: manipulation;
+}
+/* Optional blackout when held sideways (off by default on the Duo: unfolded is landscape). */
+.calc.blackout { visibility: hidden; }
+
+.safe-probe {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+           env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: manipulation;
+  cursor: default;
+}
+
+button svg {
+  display: block;
+  pointer-events: none;
+  width: calc(var(--w) * var(--s) * 1px);
+  height: calc(var(--h) * var(--s) * 1px);
+}
+
+/* Top corner buttons */
+.round {
+  position: absolute;
+  top: var(--round-top);
+  width: var(--round);
+  height: var(--round);
+  border-radius: 50%;
+  background: var(--round-bg);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.28s ease-out;
+}
+.round.left { left: var(--round-left); }
+.round.right { right: var(--round-right); }
+.round.pressed { transition: none; background: #3a3a3c; }
+
+.toast {
+  position: absolute;
+  top: calc(var(--round-top) + var(--round) / 2);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0 calc(12px * var(--s));
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--grey-text);
+  font-size: calc(14px * var(--s));
+  line-height: calc(26px * var(--s));
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease-out;
+}
+.toast.show { opacity: 1; }
+
+/* Keypad: 4 x 5. Keys are circles when width allows, and stretch into capsules on
+   short-and-wide screens like the Duo's, the way iPad and foldable layouts do. */
+.keypad {
+  position: absolute;
+  left: var(--kp-left);
+  top: var(--kp-top);
+  width: var(--kp-width);
+  display: grid;
+  grid-template-columns: repeat(4, var(--key-w));
+  grid-auto-rows: var(--key-h);
+  column-gap: var(--gap-x);
+  row-gap: var(--gap-y);
+}
+
+.key {
+  width: var(--key-w);
+  height: var(--key-h);
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--label);
+  font-weight: 400;
+  line-height: 1;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px var(--rim);
+  transition: background-color 0.28s ease-out;
+}
+.key.num { background: linear-gradient(160deg, var(--num) 55%, var(--num-low)); }
+.key.fn  { background: linear-gradient(160deg, var(--fn) 45%, var(--fn-low)); }
+.key.op  { background: linear-gradient(180deg, var(--orange) 60%, var(--orange-low)); }
+.key.pressed { transition: none; }
+.key.num.pressed { background: var(--num-press); }
+.key.fn.pressed  { background: var(--fn-press); }
+.key.op.pressed  { background: var(--orange-press); }
+.key.num:not([data-key="negate"]), .key[data-key="clear"] { padding-bottom: calc(1px * var(--s)); }
+.key[data-key="bs"] svg { transform: translateX(calc(-1px * var(--s))); }
+
+/* Grey line: the sum that produced the result */
+.expr {
+  position: absolute;
+  left: var(--text-left);
+  right: var(--text-right);
+  top: var(--expr-top);
+  height: var(--expr-font);
+  color: var(--grey-text);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  overflow: hidden;
+}
+.expr span {
+  font-size: var(--expr-font);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Big white line */
+.display {
+  position: absolute;
+  left: var(--text-left);
+  right: var(--text-right);
+  top: var(--disp-top);
+  height: var(--disp-font);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  overflow: hidden;
+}
+.display-text {
+  display: block;
+  font-size: var(--disp-font);
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+}
+/* Text too long even at 75% runs off the left edge and fades, as on iOS */
+.clipped {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 calc(24px * var(--s)));
+  mask-image: linear-gradient(to right, transparent, #000 calc(24px * var(--s)));
+}

@@ -1,0 +1,9 @@
+{
+  "name": "duocalc-tforce",
+  "private": true,
+  "description": "Calculator force web app for iPhone Duo (folded and unfolded) and other iPhones",
+  "scripts": {
+    "test": "node --test tests/engine.test.js && node tests/browser.test.js",
+    "serve": "python3 -m http.server 8080"
+  }
+}
