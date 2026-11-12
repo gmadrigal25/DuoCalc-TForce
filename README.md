@@ -21,9 +21,8 @@ Force uses. It's a fresh implementation, not a copy of that code.
 
 ## Performing
 
-1. **Set the force number.** Type it, then **hold the top-left button** (the clock, or the
-   sidebar icon when the Duo is unfolded) for about a second. The display clears and the tell
-   changes (see below). Hold the **calculator icon**
+1. **Set the force number.** Type it, then **hold the clock** (top left) for about a second. The
+   display clears and the clock's minute hand moves to **9 o'clock**. Hold the **calculator icon**
    (top right) at any time to peek at the number.
 2. **The spectator does real maths.** Every step is genuine and can be checked on another
    calculator.
@@ -35,19 +34,14 @@ Force uses. It's a fresh implementation, not a copy of that code.
    pressed.
 4. **Every tap anywhere types the next digit** of the number that's needed. The spectator can
    drum their fingers anywhere, or tap with the phone face down. Two or three fingers landing
-   together count as one tap. When every digit is in, the tell changes again (below), and further
-   taps do nothing. **Backspace** still deletes a digit, and the next tap re-types it.
+   together count as one tap. When every digit is in, the minute hand moves to **6 o'clock**,
+   and further taps do nothing. **Backspace** still deletes a digit, and the next tap re-types it.
    You can fold or unfold the phone in the middle of this.
 5. **Press =**. The force number appears, with a believable sum in grey above it. The force
    number then clears itself, and the hand returns to 3 o'clock.
 
-**The tell** is on the top-left button:
-
-| | Clock (Duo folded, or iPhone) | Sidebar icon (Duo unfolded) |
-| --- | --- | --- |
-| Nothing set | hand at 3 o'clock | 3 little lines |
-| Force number set, or digits still owed | hand at 9 o'clock | 2 lines |
-| Every digit is in, ready for = | hand at 6 o'clock | no lines |
+The clock and calculator buttons look and work the same on every screen, folded or
+unfolded, so the method is identical either way.
 
 Other details:
 
@@ -75,8 +69,8 @@ cases:
 
 - **Folded, upright:** 5 × 4 round keys.
 - **Folded, sideways:** 5 × 4 capsule keys, with the keypad stopping short of the right edge.
-- **Unfolded, upright:** 5 × 4 tall capsules, with a sidebar icon top left.
-- **Unfolded, sideways:** 5 × 4 wide capsules, with a sidebar icon top left.
+- **Unfolded, upright:** 5 × 4 tall capsules.
+- **Unfolded, sideways:** 5 × 4 wide capsules.
 
 The app picks the layout from the screen size every time it changes, so folding, unfolding and
 rotating re-fit it immediately without losing anything that's typed. Ordinary tall iPhones get

@@ -89,9 +89,11 @@ const size = ({ width, height }) => ({ width, height });
   s = await state();
   assert.strictEqual(s.text, '936+1,090', 'random taps typed 1090');
   assert.strictEqual(s.force.fed, 4);
-  const visibleLines = await page.evaluate(() =>
-    ['side1', 'side2', 'side3'].filter((id) => document.getElementById(id).style.visibility !== 'hidden').length);
-  assert.strictEqual(visibleLines, 0, 'sidebar tell: no lines once all digits are in');
+  const hand = await page.evaluate(() => {
+    const h = document.getElementById('minuteHand');
+    return h.getAttribute('x2') + ',' + h.getAttribute('y2');
+  });
+  assert.strictEqual(hand, '12,17', 'clock hand at 6 o\'clock when unfolded too');
   await page.screenshot({ path: path.join(shots, 'digits-in-unfolded.png') });
 
   await key('=');

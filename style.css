@@ -117,10 +117,6 @@ button svg {
   width: calc(var(--w) * var(--rs) * 1px);
   height: calc(var(--h) * var(--rs) * 1px);
 }
-/* Unfolded Duo shows a sidebar icon top left; everywhere else it's the clock */
-.icon-sidebar { display: none; }
-.calc.inner .icon-sidebar { display: block; }
-.calc.inner .icon-clock { display: none; }
 
 .toast {
   position: absolute;

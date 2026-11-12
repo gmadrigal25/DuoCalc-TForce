@@ -16,7 +16,6 @@
   const clockBtn = $('clockBtn');
   const modeBtn = $('modeBtn');
   const minuteHand = $('minuteHand');
-  const sideLines = [$('side1'), $('side2'), $('side3')];
   const toastEl = $('toast');
 
   const HOLD_MS = 700;
@@ -66,7 +65,6 @@
   let lift = parseFloat(store.get(KEYS.lift)) || 0; // manual vertical nudge in pt (+ moves down)
   let blackoutSideways = store.get(KEYS.blackout) === '1';
   let forcedScreen = store.get(KEYS.screen) || ''; // '', 'cover', 'inner' or 'iphone'
-  let screenKind = 'cover'; // which screen we decided we're on; the tell icon depends on it
 
   function insets() {
     const cs = getComputedStyle(probe);
@@ -146,7 +144,7 @@
     const H = calcEl.clientHeight;
     if (!W || !H) return;
     const safe = insets();
-    const { kind, mode } = pickMode(W, H);
+    const { mode } = pickMode(W, H);
     const g = mode === 'iphone' ? iphoneGeometry(W, H, safe) : duoGeometry(W, H, safe, DUO[mode], W > H);
 
     const exprFont = 0.42 * g.font;
@@ -177,12 +175,7 @@
     for (const k in vars) root.setProperty(k, vars[k]);
 
     calcEl.classList.toggle('duo', mode !== 'iphone');
-    calcEl.classList.toggle('inner', kind === 'inner');
     calcEl.dataset.mode = mode;
-    if (kind !== screenKind) {
-      screenKind = kind;
-      tell();
-    }
     calcEl.classList.toggle('blackout', blackoutSideways && W > H);
     window.scrollTo(0, 0);
     fitDisplay();
@@ -387,11 +380,10 @@
   // The force
   // ======================================================================
 
-  // The tell, on the top-left button.
-  //   Clock (cover screen / iPhone)       Sidebar icon (Duo unfolded)
-  //   3 o'clock  nothing set              3 lines
-  //   9 o'clock  force number set         2 lines   (also while digits are still owed)
-  //   6 o'clock  every digit is in        no lines  (= will show the force number)
+  // The tell, on the clock's minute hand (same on every screen):
+  //   3 o'clock  nothing set
+  //   9 o'clock  force number set (and while the spectator's digits are still owed)
+  //   6 o'clock  every digit is in; = will show the force number
   function tell() {
     const done = force.armed && force.fed >= force.digits.length;
     const set = force.target !== null;
@@ -406,8 +398,6 @@
     }
     minuteHand.setAttribute('x2', String(x));
     minuteHand.setAttribute('y2', String(y));
-    const lines = done ? 0 : set ? 2 : 3;
-    sideLines.forEach((el, i) => { el.style.visibility = i < lines ? 'visible' : 'hidden'; });
   }
 
   function setTarget(n) {

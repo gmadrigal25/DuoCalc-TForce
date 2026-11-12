@@ -23,24 +23,14 @@
       <!-- Reads the safe-area insets so the layout code can use them. -->
       <div class="safe-probe" id="safeProbe" aria-hidden="true"></div>
 
-      <!-- Top left: history. A clock on the cover screen / iPhone, a sidebar icon when the Duo is
-           unfolded (as in the real app). Hold to set / clear the force number. The icon is the tell. -->
+      <!-- Top left: history clock, on every screen. Hold to set / clear the force number.
+           The minute hand is the tell. -->
       <button class="round left" id="clockBtn" type="button" aria-label="History">
-        <svg class="icon-clock" viewBox="0 0 24 24" style="--w: 20.5; --h: 20.5" fill="none"
+        <svg viewBox="0 0 24 24" style="--w: 20.5; --h: 20.5" fill="none"
              stroke="currentColor" stroke-width="2.1" stroke-linecap="round">
           <circle cx="12" cy="12" r="10.8" />
           <line x1="12" y1="12" x2="12" y2="6" />
           <line id="minuteHand" x1="12" y1="12" x2="17" y2="12" />
-        </svg>
-        <svg class="icon-sidebar" viewBox="0 0 26 20" style="--w: 23; --h: 17.7" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <rect x="1" y="1" width="24" height="18" rx="4" />
-          <line x1="10.2" y1="1" x2="10.2" y2="19" />
-          <g stroke-width="1.6">
-            <line id="side1" x1="4" y1="5.3" x2="6.8" y2="5.3" />
-            <line id="side2" x1="4" y1="8.3" x2="6.8" y2="8.3" />
-            <line id="side3" x1="4" y1="11.3" x2="6.8" y2="11.3" />
-          </g>
         </svg>
       </button>
 
