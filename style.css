@@ -113,6 +113,12 @@ button svg {
 .round.left { left: var(--round-left); }
 .round.right { right: var(--round-right); }
 .round.pressed { transition: none; background: #3a3a3c; }
+/* The clock's minute hand is the tell; it swings between 3, 9 and 6 o'clock */
+#minuteHand {
+  transform-box: view-box;
+  transform-origin: 12px 12px;
+  transition: transform 0.45s cubic-bezier(0.3, 1.35, 0.5, 1);
+}
 .round svg {
   width: calc(var(--w) * var(--rs) * 1px);
   height: calc(var(--h) * var(--rs) * 1px);

@@ -387,17 +387,9 @@
   function tell() {
     const done = force.armed && force.fed >= force.digits.length;
     const set = force.target !== null;
-    let x = 17;
-    let y = 12;
-    if (done) {
-      x = 12;
-      y = 17;
-    } else if (set) {
-      x = 7;
-      y = 12;
-    }
-    minuteHand.setAttribute('x2', String(x));
-    minuteHand.setAttribute('y2', String(y));
+    // The hand is drawn at 3 o'clock; rotating it swings it round. 180° = 9, 90° = 6.
+    const angle = done ? 90 : set ? 180 : 0;
+    minuteHand.style.transform = 'rotate(' + angle + 'deg)';
   }
 
   function setTarget(n) {
@@ -583,19 +575,27 @@
   });
 
   // Hold / tap handling for the two round buttons.
+  // Hold / tap handling for the two round buttons. Fingers (and Apple Pencil) use touch events
+  // with preventDefault, so iOS can't turn a long press into a system gesture (callout, text
+  // selection, haptic menu) and cancel the hold half way. A mouse uses pointer events.
   function holdable(btn, { onHold, onLetGo, onTap }) {
     let timer = null;
     let held = false;
-    btn.addEventListener('pointerdown', () => {
-      btn.classList.add('pressed');
+    let active = false;
+    const start = () => {
+      if (active) return;
+      active = true;
       held = false;
+      btn.classList.add('pressed');
       timer = setTimeout(() => {
         held = true;
         timer = null;
         if (onHold) onHold();
       }, HOLD_MS);
-    });
+    };
     const end = (tapped) => {
+      if (!active) return;
+      active = false;
       btn.classList.remove('pressed');
       const wasTap = tapped && timer !== null;
       clearTimeout(timer);
@@ -604,9 +604,18 @@
       held = false;
       if (wasTap && onTap) onTap();
     };
-    btn.addEventListener('pointerup', () => end(true));
-    btn.addEventListener('pointercancel', () => end(false));
-    btn.addEventListener('pointerleave', () => end(false));
+    btn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      start();
+    }, { passive: false });
+    btn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      if (e.touches.length === 0) end(true);
+    }, { passive: false });
+    btn.addEventListener('touchcancel', () => end(false));
+    btn.addEventListener('pointerdown', (e) => { if (e.pointerType === 'mouse') start(); });
+    btn.addEventListener('pointerup', (e) => { if (e.pointerType === 'mouse') end(true); });
+    btn.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') end(false); });
   }
 
   // Clock: hold to make the number on screen the force number (the display clears).
